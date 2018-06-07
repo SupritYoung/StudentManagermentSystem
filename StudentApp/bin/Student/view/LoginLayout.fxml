@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.paint.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="468.0" prefWidth="725.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.MyController">
+   <children>
+      <Label id="label1" layoutX="130.0" layoutY="109.0" prefHeight="122.0" prefWidth="456.0" text="欢迎来到学生管理系统" textFill="#272728">
+         <font>
+            <Font name="Leelawadee UI" size="44.0" />
+         </font>
+      </Label>
+      <GridPane layoutX="231.0" layoutY="268.0" prefHeight="104.0" prefWidth="229.0" AnchorPane.bottomAnchor="128.0" AnchorPane.leftAnchor="231.0" AnchorPane.rightAnchor="265.0" AnchorPane.topAnchor="268.0">
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="157.0" minWidth="10.0" prefWidth="125.0" />
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="116.0" minWidth="10.0" prefWidth="104.0" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <Label prefHeight="20.0" prefWidth="124.0" text="    学生" />
+            <Label prefHeight="20.0" prefWidth="122.0" text="    教师" GridPane.rowIndex="1" />
+            <RadioButton mnemonicParsing="false" prefHeight="15.0" prefWidth="20.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <RadioButton mnemonicParsing="false" prefHeight="10.0" prefWidth="15.0" GridPane.columnIndex="1" />
+         </children>
+      </GridPane>
+      <Label layoutX="250.0" layoutY="233.0" prefHeight="35.0" prefWidth="154.0" text="请选择您的身份" textAlignment="CENTER" textFill="#343536">
+         <font>
+            <Font size="17.0" />
+         </font>
+      </Label>
+      <Label layoutX="572.0" layoutY="425.0" prefHeight="29.0" prefWidth="112.0" text="当前学生数量：" />
+   </children>
+</AnchorPane>
