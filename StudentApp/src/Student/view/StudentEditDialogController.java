@@ -1,12 +1,16 @@
 package Student.view;
 
-import org.controlsfx.dialog.Dialogs;
+import java.io.File;
 
 import Student.model.Student;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
-import javafx.scene.control.TextField;
+import javafx.scene.control.Button;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 /**
@@ -35,6 +39,12 @@ public class StudentEditDialogController {
 	@FXML
 	private TextField biologyField;
 	
+	//照片
+	@FXML
+	private Button btImage = new Button();
+	@FXML
+	private ImageView iv;
+	
 	private Stage dialogStage;
 	private Student student;
 	private boolean okClicked = false;
@@ -51,9 +61,11 @@ public class StudentEditDialogController {
 	}
 	
 	//设置对话框中的编辑
+	@FXML
 	public void setStudent(Student student) {
 		this.student = student;
 		
+		//先设置输入区域的值
 		nameField.setText(student.getName());
 		classInField.setText(student.getClassIn());
 		idField.setText(student.getid());
@@ -64,6 +76,16 @@ public class StudentEditDialogController {
 		physicsField.setText(Double.toString(student.getphysics()));
 		chemistryField.setText(Double.toString(student.getchemistry()));
 		biologyField.setText(Double.toString(student.getbiology()));
+		
+		//iv
+		Image image = new Image(new File(student.getPhoto()).toURI().toString(), true);
+		iv = new ImageView(image);
+		iv.setFitHeight(112);
+		iv.setFitWidth(89);
+		iv.setImage(image);
+		System.out.println(btImage);
+		btImage.setGraphic(iv);
+		
 	}
 	
 	//okClicked当用户点击确认的时候返回true
@@ -86,6 +108,9 @@ public class StudentEditDialogController {
 			student.setchemistry(Double.parseDouble(chemistryField.getText()));
 			student.setbiology(Double.parseDouble(biologyField.getText()));
 			
+			//把图片的URL传给student
+			student.setPhoto(iv.getImage().toString());
+			
 			okClicked = true;
 			dialogStage.close();
 		}
@@ -97,11 +122,38 @@ public class StudentEditDialogController {
 		dialogStage.close();
 	}
 	
+	//添加图片按钮
+	@FXML
+	private void setimage() {
+
+		try {
+			FileChooser fileChooser = new FileChooser();
+			fileChooser.setTitle("Open Resource File");
+			File file = fileChooser.showOpenDialog(new Stage());
+			String waytoimage = file.toURI().toString();// 储存路径
+			Image image = new Image(waytoimage, true);
+			ImageView iv = new ImageView(image);
+			iv.setFitHeight(112);
+			iv.setFitWidth(89);
+			iv.setImage(image);
+			//btimage.setGraphic(iv);
+
+		} catch (RuntimeException e) {
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setTitle("文件读取失败");
+			alert.setHeaderText("文件读取失败");
+			alert.setContentText("请输入正确的路径");
+			alert.showAndWait();
+			
+			e.printStackTrace();
+		}
+	}
+
+	
 	/**
 	 * 判断数据是否有效
 	 * @return 输入有效时返回true
 	 */
-	
 	private boolean isInputValid() {
 		String errorMessage = "";
 		

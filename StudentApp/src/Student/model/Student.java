@@ -26,24 +26,29 @@ public class Student {
 	private final DoubleProperty chemistry;
 	private final DoubleProperty biology;
 	
+	//照片
+	private StringProperty photo = null;
+	
 	//默认构建器，必须传入姓名和班级
 	public Student() {
-		this("暂无", "暂无", "暂无");
+		this(" ", " ", " ", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, " ");
 	}
 	
 	//初始化数据，必须传入姓名和班级
-	public Student(String name, String classIn, String id) {
+	public Student(String name, String classIn, String id, Double Chinese, Double Math, Double English
+			, Double phycics, Double chemistry, Double biology, String photo) {
 		this.name = new SimpleStringProperty(name);
 		this.classIn = new SimpleStringProperty(classIn);
 		this.id = new SimpleStringProperty(id);
 		
-		//临时虚拟数据 by6.4	
-		this.biology = new SimpleDoubleProperty(60.0);
-		this.chemistry = new SimpleDoubleProperty(70.0);
-		this.Chinese = new SimpleDoubleProperty(80.0);
-		this.English = new SimpleDoubleProperty(90.0);
-		this.Math = new SimpleDoubleProperty(70.0);
-		this.physics = new SimpleDoubleProperty(60.0);	
+		this.biology = new SimpleDoubleProperty(Chinese);
+		this.chemistry = new SimpleDoubleProperty(Math);
+		this.Chinese = new SimpleDoubleProperty(English);
+		this.English = new SimpleDoubleProperty(phycics);
+		this.Math = new SimpleDoubleProperty(chemistry);
+		this.physics = new SimpleDoubleProperty(biology);	
+		
+		this.photo = new SimpleStringProperty(photo);
 	}
 	
 	public String getName() {
@@ -162,5 +167,19 @@ public class Student {
 	public DoubleProperty EnglishProperty() {
 		return English;
 	}
+	
+	public String getPhoto() {
+		return photo.get();
+	}
+	
+	public void setPhoto(String photo) {
+		this.photo.set(photo);
+	}
+	
+	//定义photo属性方法
+	public StringProperty photoProperty() {
+		return photo;
+	}
+	
 	
 }

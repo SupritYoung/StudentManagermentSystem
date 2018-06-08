@@ -1,6 +1,11 @@
 package Student;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 import Student.model.Student;
 import Student.view.StudentEditDialogController;
@@ -18,26 +23,37 @@ import javafx.stage.Stage;
 
 public class MainApp extends Application {
 	
-	//创建一个ObserveableList去使得试图和数据同步
-	private ObservableList<Student> studentData = FXCollections.observableArrayList();
+	//创建一个ObserveableList去使得视图和数据同步
+	public ObservableList<Student> studentData = FXCollections.observableArrayList();
+	
+	//创建一个Statement
+	public Statement statement = null;
 	
 	//构建器
 	public MainApp() {
-		//添加一些样例
-		studentData.add(new Student("李明","二班","2001"));
-		studentData.add(new Student("王浩","五班","5001"));
-		studentData.add(new Student("王杰","一班","1001"));
-		studentData.add(new Student("孙玲","四班","4001"));
-		studentData.add(new Student("王聪","三班","3001"));
-		studentData.add(new Student("李娜","二班","2002"));
-		studentData.add(new Student("李晗","一班","1002"));
-		studentData.add(new Student("钱坤","四班","4002"));
-		studentData.add(new Student("周芳","五班","5002"));
-		studentData.add(new Student("杨树仁","五班","5003"));
-		Student sample1 = new Student("慈爱明","一班","1001");
-		sample1.setChinese(100);
-		sample1.setMath(100);
-		studentData.add(sample1);
+		//从数据库中读取学生信息
+		try {
+			initializeDB();
+			
+			ResultSet resultSet = statement.executeQuery("select *\r\n" + 
+					"	from student\r\n" + 
+					"go");
+			
+			while(resultSet.next() ) {
+				//类型转换
+				studentData.add(new Student(resultSet.getString(1), resultSet.getString(3), resultSet.getString(2),
+						Double.parseDouble(resultSet.getString(4)), Double.parseDouble(resultSet.getString(5)), 
+						Double.parseDouble(resultSet.getString(6)), Double.parseDouble(resultSet.getString(7)), 
+						Double.parseDouble(resultSet.getString(8)), Double.parseDouble(resultSet.getString(9)),
+						resultSet.getString(10)) );
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		//studentData.add(new Student("李明","二班","2001"));
+		
 	}
 	
 	//返回学生观察表的数据
@@ -54,8 +70,10 @@ public class MainApp extends Application {
 	public void start(Stage primaryStage) {
 		this.primaryStage = primaryStage;
 		this.primaryStage.setTitle("学生管理系统V1.0 - sup_Yang");
-		
+			
 		initRootLayout();
+		
+		//initializeDB();
 		
 		showStudentView();
 	}
@@ -77,6 +95,23 @@ public class MainApp extends Application {
 		}	
 	}
 	
+	//初始化数据库
+	private void initializeDB() {
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			System.out.println("驱动已加载");
+			String url = "jdbc:mysql://localhost:3306/studentinfo?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useSSL=false\r\n"; 
+					
+			Connection connection = DriverManager.getConnection(url, "root", "123456");
+			System.out.println("数据库已连接");
+			
+			statement = connection.createStatement();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	//展示StudenView界面
 	private void showStudentView() {
 		try {
@@ -89,8 +124,10 @@ public class MainApp extends Application {
 			rootLayout.setCenter(StudentView);
 			
 			//给控制器主程序的访问
+			//加载你已经写好的界面控制器
 			StudentViewController controller = loader.getController();
-			controller.setMainApp(this);
+			//控制器方法里的setMainApp方法
+			controller.setMainApp(this);//返回值为ObservableList
 			
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -103,7 +140,7 @@ public class MainApp extends Application {
 	 * 
 	 * @return 保存则改动返回true
 	 */
-	public boolean showPersonEditDialog(Student student) {
+	public boolean showStudentEditDialog(Student student) {
 		
 		try {
 			//加载FXML文件
