@@ -41,7 +41,7 @@ public class StudentEditDialogController {
 	
 	//’’∆¨
 	@FXML
-	private Button btImage = new Button();
+	private Button btimage = new Button();
 	@FXML
 	private ImageView iv;
 	
@@ -83,8 +83,7 @@ public class StudentEditDialogController {
 		iv.setFitHeight(112);
 		iv.setFitWidth(89);
 		iv.setImage(image);
-		System.out.println(btImage);
-		btImage.setGraphic(iv);
+		btimage.setGraphic(iv);
 		
 	}
 	
@@ -136,7 +135,7 @@ public class StudentEditDialogController {
 			iv.setFitHeight(112);
 			iv.setFitWidth(89);
 			iv.setImage(image);
-			//btimage.setGraphic(iv);
+			btimage.setGraphic(iv);
 
 		} catch (RuntimeException e) {
 			Alert alert = new Alert(AlertType.ERROR);

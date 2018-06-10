@@ -1,14 +1,34 @@
 package Student.view;
 
+import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.pdf.AcroFields;
+import com.itextpdf.text.pdf.PdfCopy;
+import com.itextpdf.text.pdf.PdfImportedPage;
+import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.PdfStamper;
 
 import Student.MainApp;
 import Student.model.Student;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -49,6 +69,8 @@ public class StudentViewController {
 	private Label chemistryLabel1;
 	@FXML
 	private Label physicsLabel1;
+	@FXML
+	private Label limage;
 	
 	
 	@FXML
@@ -108,6 +130,7 @@ public class StudentViewController {
 			iv.setFitHeight(112);
 			iv.setFitWidth(89);
 			iv.setImage(image);
+			limage.setGraphic(iv);
 			
 		}else {
 			//如果有一项是空的，该学生所有信息都会被清除
@@ -121,14 +144,13 @@ public class StudentViewController {
 			physicsLabel1.setText("");
 			biologyLabel1.setText("");
 			
-			//可能有问题
-			
+			//显示默认照片
 			Image image = new Image(new File("E:/eclipse/workSpace/StudentApp/src/image/default.jpg").toURI().toString(), true);
-			//Image image = new Image(, true);
 			iv = new ImageView(image);
 			iv.setFitHeight(112);
 			iv.setFitWidth(89);
-			iv.setImage(image); 
+			iv.setImage(image);
+			
 		}
 	}
 	
@@ -145,12 +167,11 @@ public class StudentViewController {
 			try {
 				String id = mainApp.studentData.get(selectedIndex).getid();
 				
-				mainApp.statement.executeQuery("delete from student\r\n" + 
+				mainApp.statement.execute("delete from student\r\n" + 
 						"where Stu_id = " + id);
 			} catch (SQLException e) {
 				e.printStackTrace();
-			}
-		
+			}	
 			
 		}else{
 			//没有学生信息时，弹出对话框
@@ -223,5 +244,167 @@ public class StudentViewController {
 			alert.showAndWait();
 		}
 	}
+	
+	//导出word按钮
+	@FXML
+	private void handleWordExport() {
+		int selectedIndex = studentTable.getSelectionModel().getSelectedIndex();
+	//	Student selectedStudent = mainApp.studentData.get(selectedIndex);
+		Student selectedStudent = studentTable.getSelectionModel().getSelectedItem();
+		if(selectedIndex >= 0) {
+			//只有在选中一个学生的时候才会导出
+			WordTest test = new WordTest(selectedStudent);  
+	        test.createWord(); 
+			
+		}else {
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setTitle("导出失败");
+			alert.setHeaderText("没有学生可以选择");
+			alert.setContentText("请选择一个学生");
+			alert.showAndWait();
+		}
+		
+	}
+	
+	//导出pdf按钮
+	@FXML
+	private void handlePDFExport() {
+		int selectedIndex = studentTable.getSelectionModel().getSelectedIndex();
+		Student selectedStudent = studentTable.getSelectionModel().getSelectedItem();
+			if(selectedIndex >= 0) {
+				//只有在选中一个学生的时候才会导出
+				PDFTest test = new PDFTest(selectedStudent);  
+		        test.fillTemplate();
 
+			}else {
+				Alert alert = new Alert(AlertType.ERROR);
+				alert.setTitle("导出失败");
+				alert.setHeaderText("没有学生可以选择");
+				alert.setContentText("请选择一个学生");
+				alert.showAndWait();
+			}
+	}
+	
+	//导出word类和方法
+	public class WordTest {  
+	      
+	    private Configuration configuration = null;  
+	    Student student;
+	      
+	    public WordTest(Student selectedStudent){  
+	        configuration = new Configuration();  
+	        configuration.setDefaultEncoding("UTF-8");
+	        configuration.setEncoding(Locale.getDefault(), "utf-8");
+	        //创建一个Configuration实例 的后面给这个对象设置编码为utf-8：
+	        
+	        this.student = selectedStudent;
+	    }   
+	      
+	    public void createWord(){  
+	        Map<String,Object> dataMap=new HashMap<String,Object>();  
+	        getData(dataMap);  
+	        configuration.setClassForTemplateLoading(this.getClass(), "/Student/model");//模板文件所在路径
+	        Template t = null;
+	        try {  
+	            t = configuration.getTemplate("exportModel.ftl"); //获取模板文件
+	            System.out.println("获取模板文件成功");
+	        } catch (IOException e) {  
+	            e.printStackTrace();  
+	        }  
+	        File outFile = new File("E:/outFile/"+student.getName()+"的资料.doc"); //导出文件
+	        System.out.println("导出位置为E:/outFile");
+	        Writer out = null;  
+	        try {  
+	            out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outFile)));  
+	        } catch (FileNotFoundException e1) {  
+	            e1.printStackTrace();  
+	        }  
+	           
+	        try {  
+	            t.process(dataMap, out); //将填充数据填入模板文件并输出到目标文件 
+	            
+	            //关闭流
+	            out.flush();  
+	            out.close(); 
+	        } catch (TemplateException e) {  
+	            e.printStackTrace();  
+	        } catch (IOException e) {  
+	            e.printStackTrace();  
+	        }  
+	        System.out.println("导出成功");
+	    }  
+	  
+	    //填充数据
+	    private void getData(Map<String, Object> dataMap) {  
+	        dataMap.put("Name", student.getName());  
+	        dataMap.put("Photo", student.getPhoto());  
+	        dataMap.put("Id", student.getid());  
+	        dataMap.put("Class", student.getClassIn());         
+	        dataMap.put("Chinese", student.getChinese());  
+	        dataMap.put("Math", student.getMath());
+	        dataMap.put("English", student.getEnglish());
+	        dataMap.put("Physics", student.getphysics());
+	        dataMap.put("Chemistry", student.getchemistry());
+	        dataMap.put("biology", student.getbiology());
+	           
+	    }  
+	} 
+	
+	//导出PDF类和方法
+	public class PDFTest { 
+		
+		Student student;
+		
+		public PDFTest(Student selectedStudent) {
+			this.student = selectedStudent;
+		}
+		
+	    // 利用模板生成pdf  
+	    public void fillTemplate() {  
+	        // 模板路径  
+	        String templatePath = "/Student/model/exportModel.pdf";  
+	        // 生成的新文件路径  
+	        String newPDFPath = "E:/outFile/"+student.getName()+"的资料.pdf";  
+	        System.out.println("路径已生成");
+	        PdfReader reader;  
+	        FileOutputStream out;  
+	        ByteArrayOutputStream bos;  
+	        PdfStamper stamper;  
+	        try {  
+	            out = new FileOutputStream(newPDFPath);// 输出流  
+	            reader = new PdfReader(templatePath);// 读取pdf模板  
+	            bos = new ByteArrayOutputStream();  
+	            stamper = new PdfStamper(reader, bos);  
+	            AcroFields form = stamper.getAcroFields();  
+	  
+	            String[] str = { student.getName(), student.getid(), student.getClassIn(), String.valueOf(student.getPhoto()), String.valueOf(student.getChinese()),
+	            		String.valueOf(student.getMath()), String.valueOf(student.getEnglish()), String.valueOf(student.getphysics()), String.valueOf(student.getchemistry()),
+	            		(String.valueOf(student.getbiology()))};  
+	            int i = -1;  
+	            java.util.Iterator<String> it = form.getFields().keySet().iterator();  
+	            while (it.hasNext()) {  
+	                String name = it.next().toString();             
+	                form.setField(name, str[++i]);  
+	                System.out.println(name +"<->"+ str[i]);  
+	            }  
+	            System.out.println("导出成功");
+	            stamper.setFormFlattening(true);// 如果为false那么生成的PDF文件还能编辑，一定要设为true  
+	            stamper.close();  
+	  
+	            Document doc = new Document();  
+	            PdfCopy copy = new PdfCopy(doc, out);  
+	            doc.open();  
+	            PdfImportedPage importPage = copy.getImportedPage(new PdfReader(bos.toByteArray()), 1);  
+	            copy.addPage(importPage);  
+	            doc.close();  
+	  
+	        } catch (IOException e) {  
+	            System.out.println(1);  
+	        } catch (DocumentException e) {  
+	            System.out.println(2);  
+	        }  
+	  
+	    }  
+
+	} 
 }
